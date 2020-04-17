@@ -1,0 +1,54 @@
+version: "3.7"
+services:
+    nginx: 
+        image: nginx:latest
+        volumes:
+            - ./nginx/nginx.conf:/etc/nginx/nginx.conf
+        ports:
+            - 80:80
+            - 443:443
+        networks:
+            - frontend
+    postgres:
+        image: postgres
+        restart: always
+        ports:
+            - 5432:5432
+        networks:
+            - backend
+        environment:
+            - POSTGRES_PASSWORD=password
+            - POSTGRES_DB=code-sharing
+    back.code-sharing:
+        image: infiniityr/back.code-sharing:latest
+        restart: always
+        depends_on:
+            - postgres
+        ports:
+            - 8888:8080
+        networks:
+            - backend
+            - frontend
+        environment:
+            - PATH_CONTEXT=/api
+            - DATABASE_USER=postgres
+            - DATABASE_NAME=code-sharing
+            - DATABASE_PASSWORD=password
+            - DATABASE_HOST=postgres
+    front.code-sharing:
+        image: infiniityr/front.code-sharing:latest
+        restart: always
+        depends_on:
+            - back.code-sharing
+        ports:
+            - 3000:3000
+        networks:
+            - frontend
+        environment:
+            - API_HOST=back.code-sharing
+            - API_PORT=8080
+            - API_PREFIX=/api
+
+networks:
+    frontend:
+    backend:
