@@ -9,6 +9,9 @@ services:
             - 443:443
         networks:
             - frontend
+        depends_on:
+            - back.code-sharing
+            - front.code-sharing
     postgres:
         image: postgres
         restart: always
